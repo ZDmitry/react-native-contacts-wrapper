@@ -78,7 +78,7 @@ public class ContactsWrapper extends ReactContextBaseJavaModule implements Activ
     }
     
     @Override
-    public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
+    public void onActivityResult(final Activity activity, final int requestCode, final int resultCode, final Intent intent) {
 
         if(mContactsPromise == null || mCtx == null
               || (requestCode != CONTACT_REQUEST && requestCode != EMAIL_REQUEST)){
@@ -109,7 +109,7 @@ public class ContactsWrapper extends ReactContextBaseJavaModule implements Activ
                                 idx = cursor.getColumnIndex(ContactsContract.Contacts._ID);
                                 id = cursor.getString(idx);
                             } else {
-                                mContactsPromise.reject(E_CONTACT_NO_DATA, "Contact Data Not Found");
+                                mContactsPromise.reject(E_CONTACT_NO_DATA, new RuntimeException("Contact Data Not Found"));
                                 return;
                             }
                             
@@ -144,11 +144,11 @@ public class ContactsWrapper extends ReactContextBaseJavaModule implements Activ
                                 mContactsPromise.resolve(contactData);
                                 return;
                             } else {
-                                mContactsPromise.reject(E_CONTACT_NO_DATA, "No data found for contact");
+                                mContactsPromise.reject(E_CONTACT_NO_DATA, new RuntimeException("No data found for contact"));
                                 return;
                             }
                         } catch (Exception e) {
-                            mContactsPromise.reject(E_CONTACT_EXCEPTION, e.getMessage());
+                            mContactsPromise.reject(E_CONTACT_EXCEPTION, e);
                             return;
                         }
                         /* No need to break as all paths return */
@@ -174,26 +174,27 @@ public class ContactsWrapper extends ReactContextBaseJavaModule implements Activ
                                 return;
                             } else {
                                 //Contact has no email address stored
-                                mContactsPromise.reject(E_CONTACT_NO_EMAIL, "No email found for contact");
+                                mContactsPromise.reject(E_CONTACT_NO_EMAIL, new RuntimeException("No email found for contact"));
                                 return;
                             }
                         } catch (Exception e) {
-                            mContactsPromise.reject(E_CONTACT_EXCEPTION, e.getMessage());
+                            mContactsPromise.reject(E_CONTACT_EXCEPTION, e);
                             return;
                         }
                         /* No need to break as all paths return */
                     default:
                         //Unexpected return code - shouldn't happen, but catch just in case
-                        mContactsPromise.reject(E_CONTACT_EXCEPTION, "Unexpected error in request");
+                        mContactsPromise.reject(E_CONTACT_EXCEPTION, new RuntimeException("Unexpected error in request"));
                         return;
                 }
             default:
                 //Request was cancelled
-                mContactsPromise.reject(E_CONTACT_CANCELLED, "Cancelled");
+                mContactsPromise.reject(E_CONTACT_CANCELLED, new RuntimeException("Cancelled"));
                 return;
         }
     }
 
+    @Override
     public void onNewIntent(Intent intent) {
 
     }
